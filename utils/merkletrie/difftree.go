@@ -297,8 +297,14 @@ func DiffTreeContext(ctx context.Context, fromTree, toTree noder.Noder,
 		case noMoreNoders:
 			return ret, nil
 		case onlyFromRemains:
-			if err = ret.AddRecursiveDelete(from); err != nil {
-				return nil, err
+			if node, ok := ignoredNode(toTree, from); ok {
+				if err = diffNodesSameName(&ret, ii, ii.from.current, node); err != nil {
+					return nil, err
+				}
+			} else {
+				if err = ret.AddRecursiveDelete(from); err != nil {
+					return nil, err
+				}
 			}
 			if err = ii.nextFrom(); err != nil {
 				return nil, err
@@ -367,7 +373,7 @@ func diffNodes(changes *Changes, ii *doubleIter) error {
 			return err
 		}
 	default:
-		if err := diffNodesSameName(changes, ii); err != nil {
+		if err := diffNodesSameName(changes, ii, ii.from.current, ii.to.current); err != nil {
 			return err
 		}
 	}
@@ -375,11 +381,8 @@ func diffNodes(changes *Changes, ii *doubleIter) error {
 	return nil
 }
 
-func diffNodesSameName(changes *Changes, ii *doubleIter) error {
-	from := ii.from.current
-	to := ii.to.current
-
-	status, err := ii.compare()
+func diffNodesSameName(changes *Changes, ii *doubleIter, from, to noder.Path) error {
+	status, err := ii.compareNoders(from, to)
 	if err != nil {
 		return err
 	}
@@ -450,4 +453,18 @@ func diffDirs(changes *Changes, ii *doubleIter) error {
 	}
 
 	return nil
+}
+
+func ignoredNode(tree noder.Noder, path noder.Path) (noder.Path, bool) {
+	type ignoreNoder interface {
+		PathIgnored(noder.Path) bool
+		FindNode(noder.Path) (noder.Path, bool)
+	}
+
+	in, ok := tree.(ignoreNoder)
+	if !ok || !in.PathIgnored(path) {
+		return nil, false
+	}
+
+	return in.FindNode(path)
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5/plumbing/cache"
+	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -86,4 +87,20 @@ func TestIndexEntrySizeUpdatedForNonRegularFiles(t *testing.T) {
 
 	// Check whether the index was updated with the two new line breaks.
 	assert.Equal(t, uint32(len(content)+2), idx.Entries[0].Size)
+}
+
+func TestWorktree_Status(t *testing.T) {
+	r, err := PlainOpenWithOptions("/home/silke/Development/bauwatch/tools/toolchain", &PlainOpenOptions{
+		DetectDotGit: true,
+	})
+	require.NoError(t, err)
+
+	worktree, err := r.Worktree()
+	require.NoError(t, err)
+
+	worktree.Excludes, err = gitignore.LoadGlobalPatterns(osfs.New("/"))
+	require.NoError(t, err)
+
+	_, err = worktree.Status()
+	require.NoError(t, err)
 }
