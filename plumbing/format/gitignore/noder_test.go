@@ -4,8 +4,8 @@ import (
 	"io/fs"
 	"testing"
 
-	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
-	"github.com/go-git/go-git/v5/utils/merkletrie/noder"
+	"github.com/BauWatch/go-git/v5/plumbing/format/gitignore"
+	"github.com/BauWatch/go-git/v5/utils/merkletrie/noder"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

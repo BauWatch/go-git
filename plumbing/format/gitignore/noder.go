@@ -3,7 +3,7 @@ package gitignore
 import (
 	"slices"
 
-	"github.com/go-git/go-git/v5/utils/merkletrie/noder"
+	"github.com/BauWatch/go-git/v5/utils/merkletrie/noder"
 )
 
 var _ noder.Noder = (*MatchNoder)(nil)
